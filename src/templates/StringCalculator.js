@@ -14,7 +14,7 @@ const StringCalculator = () => {
             throw new Error(`Negative numbers are not allowed: ${negatives.join(', ')}`);
         }
 
-        return numList.reduce((sum, num) => sum + Number(num), 0); // Sum the numbers
+        return numList.reduce((sum, num) => sum + Number(num), 0);
     };
 
     const handleCalculate = (event) => {
