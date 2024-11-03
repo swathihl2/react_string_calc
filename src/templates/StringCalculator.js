@@ -4,41 +4,32 @@ import './StringCalculator.css';
 const StringCalculator = () => {
     const [numbers, setNumbers] = useState('');
     const [result, setResult] = useState('');
-    const [loading, setLoading] = useState(false);
 
-    const handleSubmit = async (event) => {
+    const localCalculate = (input) => {
+        const numList = input.match(/-?\d+/g);
+        if (!numList) return 0;
+
+        const negatives = numList.map(Number).filter(num => num < 0);
+        if (negatives.length) {
+            throw new Error(`Negative numbers are not allowed: ${negatives.join(', ')}`);
+        }
+
+        return numList.reduce((sum, num) => sum + Number(num), 0); // Sum the numbers
+    };
+
+    const handleCalculate = (event) => {
         event.preventDefault();
-        
         const trimmedData = numbers.trim();
         if (!trimmedData) {
             setResult('0');
             return;
         }
 
-        const url = 'https://shl-server.onrender.com/stringcalc';
-        setLoading(true);
-        setResult('');
-
         try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ numbers: trimmedData }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Network response was not ok: ' + response.statusText);
-            }
-
-            const data = await response.text();
-            setResult(data);
+            const calculationResult = localCalculate(trimmedData);
+            setResult(`Result: ${calculationResult}`);
         } catch (error) {
-            console.error('Error:', error);
             setResult('Error: ' + error.message);
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -48,7 +39,7 @@ const StringCalculator = () => {
                 <h1>Simple String Calculator</h1>
             </header>
             <main>
-                <form id="dataForm" onSubmit={handleSubmit}>
+                <form id="dataForm" onSubmit={handleCalculate}>
                     <label htmlFor="numbers">Enter the string:</label>
                     <input
                         type="text"
@@ -56,16 +47,13 @@ const StringCalculator = () => {
                         name="numbers"
                         value={numbers}
                         onChange={(e) => setNumbers(e.target.value)}
-                    /><br /><br />
-                    <input type="submit" value="Submit" />
+                        placeholder="e.g., 1,2,3"
+                    />
+                    <button type="submit">Calculate</button>
                 </form>
 
                 <div id="responseContainer">
-                    {loading ? (
-                        <div id="loading">Loading...</div>
-                    ) : (
-                        <div id="response">{result}</div>
-                    )}
+                    <div>{result}</div>
                 </div>
             </main>
         </div>
